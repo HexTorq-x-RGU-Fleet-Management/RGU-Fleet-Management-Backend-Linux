@@ -17,7 +17,7 @@ export async function migrate(client, { ownerRole = 'cam_owner' } = {}) {
     await client.query(
       'CREATE TABLE IF NOT EXISTS cam.schema_migrations (name text PRIMARY KEY, sha256 text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())',
     );
-    for (const name of ['schema.sql', 'grants.sql', 'fleet.sql', 'workspace.sql']) {
+    for (const name of ['schema.sql', 'google-auth.sql', 'grants.sql', 'fleet.sql', 'workspace.sql']) {
       const code = await readFile(new URL('../db/' + name, import.meta.url), 'utf8');
       const hash = createHash('sha256').update(code.replace(/\r\n/g, '\n')).digest('hex');
       const existing = (
