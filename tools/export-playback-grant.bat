@@ -6,23 +6,12 @@ set "DEFAULT_LOG=%~dp0..\..\..\..\Playground\Camera\log\opensdk\opensdk.log"
 set "LOG=%~1"
 
 if not defined LOG if exist "%DEFAULT_LOG%" set "LOG=%DEFAULT_LOG%"
-if not defined LOG (
-  echo Enter the full path to the iVMS OpenSDK log file.
-  set /p "LOG=Log path: "
+echo Checking iVMS, the OpenSDK log and the playback grant...
+if defined LOG (
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\tools\export-windows-playback.ps1" -ClientLog "%LOG%"
+) else (
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\tools\export-windows-playback.ps1"
 )
-if not defined LOG (
-  echo No log path was provided.
-  pause
-  exit /b 2
-)
-if not exist "%LOG%" (
-  echo Log file not found: "%LOG%"
-  pause
-  exit /b 2
-)
-
-echo Checking the iVMS log and creating a private playback grant...
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\tools\export-windows-playback.ps1" -ClientLog "%LOG%"
 if errorlevel 1 (
   echo.
   echo Export failed. Make sure iVMS is signed in and has played a camera.
