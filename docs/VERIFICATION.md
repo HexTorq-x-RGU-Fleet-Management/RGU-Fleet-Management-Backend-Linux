@@ -21,3 +21,16 @@ syntax and YAML structure are checked locally. There is no Docker/WSL runtime on
 this PC, so the image build, Linux UID/mode behavior, Wine DLL loading, actual cloud
 authorization/renewal and real-camera load are pending. Read LINUX-ACCEPTANCE.md.
 No SSH, production database connection, VPS change or deployment was performed.
+
+## Wine media package compatibility correction
+
+The first operator Docker build failed while resolving av==19.0.1 for Windows
+CPython 3.11. That PyAV release requires Python 3.12+. The Dockerfile now uses
+runtime/requirements-wine.txt (PyAV 18.1.0, Pillow 12.3.0) for embedded Windows
+Python, and preserves native/requirements.txt for Ubuntu Python 3.12+.
+
+Both exact Windows CPython 3.11 wheels were downloaded successfully. A private
+local copy of embedded Windows Python 3.11.9 loaded those packages and passed all
+6 audio and 4 H264 encoder tests. Native Linux CPython 3.12 wheels were resolved
+separately. These checks do not execute Wine or certify the completed image;
+the operator still needs to pull and rebuild it on Linux.

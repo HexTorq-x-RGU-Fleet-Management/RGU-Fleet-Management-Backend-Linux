@@ -14,14 +14,15 @@ RUN mkdir -p /opt/windows-python && curl --fail --show-error --location \
     && echo '009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b  /tmp/python.zip' | sha256sum -c - \
     && unzip -q /tmp/python.zip -d /opt/windows-python && rm /tmp/python.zip
 WORKDIR /app
-COPY vendor/camera-sdk/native/requirements.txt /tmp/requirements.txt
+COPY vendor/camera-sdk/native/requirements.txt /tmp/requirements-native.txt
+COPY runtime/requirements-wine.txt /tmp/requirements-wine.txt
 RUN python3 -m venv /opt/codec-tools \
     && /opt/codec-tools/bin/pip download --disable-pip-version-check --no-deps --only-binary=:all: \
-       --platform win_amd64 --python-version 311 --abi cp311 -r /tmp/requirements.txt -d /tmp/wheels \
+       --platform win_amd64 --python-version 311 --abi cp311 -r /tmp/requirements-wine.txt -d /tmp/wheels \
     && /opt/codec-tools/bin/python -c "import pathlib,zipfile; p=pathlib.Path('/opt/windows-python/Lib/site-packages'); p.mkdir(parents=True,exist_ok=True); [zipfile.ZipFile(w).extractall(p) for w in pathlib.Path('/tmp/wheels').glob('*.whl')]" \
     && printf 'python311.zip\n.\nLib/site-packages\nimport site\n' > /opt/windows-python/python311._pth \
-    && /opt/codec-tools/bin/pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm -rf /tmp/wheels /tmp/requirements.txt
+    && /opt/codec-tools/bin/pip install --no-cache-dir -r /tmp/requirements-native.txt \
+    && rm -rf /tmp/wheels /tmp/requirements-native.txt /tmp/requirements-wine.txt
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 COPY . .
