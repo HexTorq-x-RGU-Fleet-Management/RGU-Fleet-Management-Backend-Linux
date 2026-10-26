@@ -30,6 +30,7 @@ no Docker/WSL environment. No VPS connection or deployment was performed.
 - [Linux acceptance and current evidence](docs/LINUX-ACCEPTANCE.md)
 - [API contract](docs/API.md)
 - [Verification results](docs/VERIFICATION.md)
+- [Actual shared database provisioning status](docs/DATABASE-SETUP.md)
 
 Linux cannot read an installed Windows iVMS sign-in. Saved valid grants can be
 migrated; new grants can be imported by the workspace admin and verified by the SDK.
@@ -42,6 +43,10 @@ integration scope. Microphone forwarding and DVR archive playback remain deferre
 Use amd64 Linux, Node 24, PostgreSQL 17, Wine/embedded Windows Python and the complete
 authorized SDK dependency tree. The recommended prepared runtime is the Dockerfile
 plus deploy/compose.yaml. Do not attempt to load DLLs in native Linux ctypes.
+
+The fresh schema and read-only runtime permissions were also verified on the
+selected PostgreSQL 16.15 database; see [database setup](docs/DATABASE-SETUP.md). This is not a validated
+Windows PostgreSQL 17 backup restore into version 16.
 
 ```sh
 npm ci
