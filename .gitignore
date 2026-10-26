@@ -32,3 +32,9 @@ venv/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# External SDK binaries and database backup artifacts
+/sdk/
+*.dll
+*.dump
+reports/

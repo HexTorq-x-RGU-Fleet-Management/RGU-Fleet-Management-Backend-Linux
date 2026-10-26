@@ -1,0 +1,61 @@
+services:
+  api:
+    image: rgu-fleet-backend-linux:local
+    platform: linux/amd64
+    build:
+      context: ..
+    init: true
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8102
+      DATABASE_URL_FILE: /run/secrets/database-url
+      HIK_SAAS_MASTER_KEY_FILE: /run/secrets/provider-key
+    ports:
+      - '127.0.0.1:${RGU_API_PORT:-21000}:8102'
+    volumes:
+      - ../.local/data:/var/lib/rgu/data
+      - ../.local/wine:/var/lib/rgu/wine
+      - ../.local/home:/var/lib/rgu/home
+      - ${RGU_SDK_HOST_DIR:?Set the authorized SDK directory}:/opt/hik-sdk:ro
+    secrets:
+      - database-url
+      - provider-key
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    stop_grace_period: 30s
+    pids_limit: 512
+    mem_limit: 4g
+    cpus: 2
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8102/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+  migrate:
+    image: rgu-fleet-backend-linux:local
+    platform: linux/amd64
+    profiles: [tools]
+    user: '10001:10001'
+    entrypoint: ['node', 'tools/migrate.mjs']
+    environment:
+      MIGRATION_DATABASE_URL_FILE: /run/secrets/migration-url
+    secrets: [migration-url]
+secrets:
+  database-url:
+    file: ../.local/secrets/database-url
+  provider-key:
+    file: ../.local/secrets/provider-key
+  migration-url:
+    file: ../.local/secrets/migration-url

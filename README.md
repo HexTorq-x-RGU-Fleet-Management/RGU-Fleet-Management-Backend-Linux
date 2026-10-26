@@ -1,52 +1,87 @@
 # RGU Fleet Management Linux Backend
 
-Repository: https://github.com/HexTorq-x-RGU-Fleet-Management/RGU-Fleet-Management-Backend-Linux
+Independent API-only Linux port of Windows backend `6a45b48`. It owns its SaaS,
+fleet, PostgreSQL policies, recording storage, provider clients and Wine receiver
+source. The React frontend remains a separate repository. No sibling source imports.
 
-## Status
+Local implementation and portable checks are complete; **Linux/Wine runtime and
+real-camera production acceptance remain pending**. This Windows workstation has
+no Docker/WSL environment. No VPS connection or deployment was performed.
 
-Initial repository scaffold. The Linux SaaS backend is not implemented here yet.
-There is no backend entry point, container image or runnable deployment yet.
+## What is included
 
-## Purpose and target
+- Platform-owner setup, workspace approval, admin/member roles, channel grants,
+  password support, suspension and session revocation.
+- Real Hik-Connect inventory, direct web sign-in, encrypted opt-in web recovery,
+  channel-health observations and account-switch protection.
+- Pooled SDK playback through Wine: Smooth H264, JPEG compatibility, PCM audio and
+  previews using the same authenticated media API.
+- PostgreSQL buses/recorder mapping, server-only mock GPS/fuel JSONB observations
+  and history. Actual vendor GPS/fuel integration remains phase 2.
+- Per-user UI preferences/layouts/favourites, persistent clips and retention,
+  scoped downloads/deletion, audit and superadmin health.
+- Container recipe, migration/check tools, private key transfer helpers and a
+  loopback-bound Compose service. The image recipe has not been built here.
 
-Build the Linux backend with V3's existing SaaS/security behavior and adapt the
-existing pooled Linux/Wine media runtime behind the agreed API. Intended runtime:
-Linux, Node.js, PostgreSQL, Python/Wine and the authorized Windows SDK binaries.
-This scaffold does not turn Windows DLLs into native Linux shared libraries.
+## Read first
 
-Preserve V3 approvals, workspaces, membership, permissions, sessions, scoped media
-and recordings, provider recovery, audit and health. Copying the older single-owner
-Linux viewer alone would not provide those SaaS features.
+- [Feature parity and platform differences](docs/FEATURE-PARITY.md)
+- [Production migration: Windows data to Linux](docs/PRODUCTION-MIGRATION.md)
+- [Linux acceptance and current evidence](docs/LINUX-ACCEPTANCE.md)
+- [API contract](docs/API.md)
+- [Verification results](docs/VERIFICATION.md)
 
-## Migration references
+Linux cannot read an installed Windows iVMS sign-in. Saved valid grants can be
+migrated; new grants can be imported by the workspace admin and verified by the SDK.
+No independent automatic SDK grant renewal is claimed. CAPTCHA/provider challenges
+cannot be removed by this wrapper. India native playback remains the established
+integration scope. Microphone forwarding and DVR archive playback remain deferred.
 
-- [V3 SaaS/security baseline](https://github.com/HexTorq-CCTV-Camera-Web/Hik-Vision/tree/standalone-baseline-2026-10-25/v3)
-- [Existing Linux/Wine implementation](https://github.com/HexTorq-CCTV-Camera-Web/Hik-Vision/tree/standalone-baseline-2026-10-25/linux)
-- [Verified Windows SDK bundle](https://github.com/HexTorq-CCTV-Camera-Web/Hik-Vision/tree/standalone-baseline-2026-10-25/sdk)
+## Local Linux setup
 
-Local references on the original workstation are under ../../Camera/hikvision/.
-Own all runtime source in this repository after migration; no sibling repository
-imports. Define Linux secret/key protection explicitly instead of copying Windows
-DPAPI files. Keep existing SDK authorization and renewal limitations visible.
-
-## Related projects and acceptance
-
-- [Frontend](https://github.com/HexTorq-x-RGU-Fleet-Management/RGU-Fleet-Management-Frontend)
-- [Windows backend](https://github.com/HexTorq-x-RGU-Fleet-Management/RGU-Fleet-Management-Backend-Windows)
-
-Both backends must satisfy the same API, permissions and media contracts. Linux
-acceptance must include POSIX permissions, Wine/SDK dependencies, restart/recovery,
-real cameras, concurrent load and recording storage. Windows test success alone
-does not establish Linux production readiness. No production deployment is implied.
-
-## Checkout and repository policy
+Use amd64 Linux, Node 24, PostgreSQL 17, Wine/embedded Windows Python and the complete
+authorized SDK dependency tree. The recommended prepared runtime is the Dockerfile
+plus deploy/compose.yaml. Do not attempt to load DLLs in native Linux ctypes.
 
 ```sh
-git clone https://github.com/HexTorq-x-RGU-Fleet-Management/RGU-Fleet-Management-Backend-Linux.git backend-linux
-cd backend-linux
+npm ci
+cp .env.example .env
+chmod 600 .env
+# Create the new database/roles, private key/URL files and mount directories first.
+# Configure .env, SDK identity and private network access using the migration guide.
+docker compose -p rgu-fleet-v3 --env-file .env -f deploy/compose.yaml build api
+docker compose -p rgu-fleet-v3 --env-file .env -f deploy/compose.yaml run --rm migrate
+docker compose -p rgu-fleet-v3 --env-file .env -f deploy/compose.yaml up -d api
 ```
 
-.gitignore excludes secrets, keys, provider grants, dependencies, virtual
-environments, databases, private data, recordings and logs. Future container and
-reverse-proxy definitions will be added during implementation. No SSH, container
-build, provider login or VPS change was performed to create this repository.
+Direct Node defaults to loopback port 8102. Compose exposes container 8102 only on
+host 127.0.0.1:21000, configurable with RGU_API_PORT. Do not collide with the old pilot.
+The database URL belongs to restricted cam_app; a separate NOLOGIN BYPASSRLS owner
+owns privileged routines. The app never receives the migration DBA URL.
+
+Use the original encryption key with migrated provider ciphertext. Files must be
+owned by the service UID with 0600/0400 mode. No key is silently regenerated.
+Windows .dpapi files cannot be used as Linux key files.
+
+## Checks
+
+```sh
+npm run test:portable
+# Run inside the actual prepared amd64 Linux/Wine container:
+npm run test:runtime
+# Requires both the isolated test PostgreSQL and Linux runtime:
+npm run test:all
+```
+
+See the acceptance document for isolated DB setup. Tests create/drop only unique
+cam_test_* databases on local port 55432. Tests never use the application DATABASE_URL.
+The test-only acceptance server on 8109 supplies backend fixtures for the React
+browser suite; server.mjs never exposes its fixture routes.
+
+The source parity manifest records 45 unchanged common files from Windows. Platform
+adaptations include configuration/key files, playback import, receiver pooling,
+Linux startup and migration/acceptance tooling. Preserve both the shared API suite
+and platform tests when synchronizing later changes.
+
+Keep .env, .local, credentials, DLLs, Wine prefixes, recordings and logs out of Git.
+Only the specific source/configuration templates are intended for publication.

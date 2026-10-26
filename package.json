@@ -1,0 +1,28 @@
+{
+  "name": "rgu-fleet-management-backend-linux",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --env-file-if-exists=.env --test test/*.test.mjs",
+    "test:unit": "node --test test/access.test.mjs test/config.test.mjs test/deployment.test.mjs",
+    "test:portable": "node --env-file-if-exists=.env tools/run-portable-tests.mjs",
+    "test:runtime": "node --env-file-if-exists=.env tools/check-runtime.mjs",
+    "db:migrate": "node --env-file-if-exists=.env tools/migrate.mjs",
+    "check": "node tools/check-source.mjs",
+    "check:parity": "node tools/check-parity.mjs",
+    "test:all": "node tools/run-tests.mjs",
+    "test:acceptance:serve": "node tools/serve-acceptance.mjs",
+    "format": "prettier --write server.mjs lib tools test package.json *.md"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  }
+}
