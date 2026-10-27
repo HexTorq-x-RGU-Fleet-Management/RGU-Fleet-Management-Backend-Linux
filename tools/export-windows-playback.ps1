@@ -49,6 +49,16 @@ function Find-OpenSdkLogs {
   @($found | Where-Object { Test-Path -LiteralPath $_ } | Sort-Object -Unique |
     ForEach-Object { Get-Item -LiteralPath $_ } | Sort-Object LastWriteTime -Descending)
 }
+function Read-LogLines([string]$path) {
+  $stream = $null; $reader = $null
+  try {
+    $stream = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete)
+    $reader = [IO.StreamReader]::new($stream)
+    while (($line = $reader.ReadLine()) -ne $null) { Write-Output $line }
+  } finally {
+    if ($reader) { $reader.Dispose() } elseif ($stream) { $stream.Dispose() }
+  }
+}
 
 Write-Output 'RGU PLAYBACK GRANT EXPORT'
 Write-Output '========================='
@@ -83,7 +93,13 @@ $taskRegion = $false
 $taskToken = $null
 $hasLoginRecord = $false
 $hasPlaybackEvidence = $false
-foreach ($taskLine in [IO.File]::ReadLines($logItem.FullName)) {
+try { $taskLines = @(Read-LogLines $logItem.FullName) }
+catch {
+  Write-Check FAIL "The OpenSDK log is locked and could not be read: $($logItem.FullName)"
+  Write-Output 'Leave iVMS open and retry, or close iVMS and run this helper again.'
+  exit 4
+}
+foreach ($taskLine in $taskLines) {
   if ($taskLine -notmatch 'COpenSDKUnited::GetLoginParams') { continue }
   $hasLoginRecord = $true
   $taskKey = [regex]::Match($taskLine, '\bKey\s*[:=]\s*(\d+)').Groups[1].Value
