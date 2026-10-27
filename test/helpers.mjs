@@ -30,6 +30,7 @@ export async function postgresFixture(t, { migrate = true } = {}) {
       await migration.query(await readFile(path.join(project, 'db/schema.sql'), 'utf8'));
       await migration.query(await readFile(path.join(project, 'db/grants.sql'), 'utf8'));
       await migration.query(await readFile(path.join(project, 'db/fleet.sql'), 'utf8'));
+      await migration.query(await readFile(path.join(project, 'db/wheelseye.sql'), 'utf8'));
       await migration.query(await readFile(path.join(project, 'db/workspace.sql'), 'utf8'));
     }
   } finally {
