@@ -99,6 +99,7 @@ catch {
   Write-Output 'Leave iVMS open and retry, or close iVMS and run this helper again.'
   exit 4
 }
+$hasPlaybackEvidence = [bool](@($taskLines | Where-Object { $_ -match '(?i)(play|playback|stream|channel|preview|live)' }).Count)
 foreach ($taskLine in $taskLines) {
   if ($taskLine -notmatch 'COpenSDKUnited::GetLoginParams') { continue }
   $hasLoginRecord = $true
@@ -109,7 +110,6 @@ foreach ($taskLine in $taskLines) {
     $taskCandidate = [regex]::Match($taskValue, '^at\.[A-Za-z0-9._-]{16,1024}(?=\s|$)').Value
     if ($taskCandidate) { $taskToken = $taskCandidate }
   }
-  if ($taskLine -match '(?i)(play|playback|stream|channel|preview|live)') { $hasPlaybackEvidence = $true }
 }
 
 if ($hasLoginRecord) { Write-Check PASS 'Hik-Connect OpenSDK login record found in the log.' }
