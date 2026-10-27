@@ -34,6 +34,10 @@ Its current-location response contains GPS, speed, ignition and device power sta
 it does not contain fuel litres or fuel percentage. Automatic minute polling is not
 The optional one-workspace background poller runs every `WHEELSEYE_POLL_INTERVAL_MS`
 (default 60 seconds) when `WHEELSEYE_TENANT_ID` and `WHEELSEYE_ADMIN_USER_ID` are set.
+For Docker, mount the token through a private compose override rather than changing
+the tracked base compose file: add the token secret to `.local/limits.yaml`, set
+`WHEELSEYE_ACCESS_TOKEN_FILE=/run/secrets/wheelseye-token`, and pass that override
+when starting the API.
 
 Apply additive db/fleet.sql after schema.sql/grants.sql as migration owner.
 npm run setup:local applies this only to the private local database. Baseline SQL
