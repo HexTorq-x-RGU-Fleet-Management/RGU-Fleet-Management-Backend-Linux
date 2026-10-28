@@ -25,6 +25,7 @@ export async function migrate(client, { ownerRole = 'cam_owner' } = {}) {
       'wheelseye.sql',
       'wheelseye-admin.sql',
       'wheelseye-live.sql',
+      'wheelseye-10s.sql',
       'workspace.sql',
     ]) {
       const code = await readFile(new URL('../db/' + name, import.meta.url), 'utf8');
