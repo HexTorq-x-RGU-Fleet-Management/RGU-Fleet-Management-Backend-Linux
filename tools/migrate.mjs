@@ -22,6 +22,7 @@ export async function migrate(client, { ownerRole = 'cam_owner' } = {}) {
       'google-auth.sql',
       'grants.sql',
       'fleet.sql',
+      'speed-monitoring.sql',
       'wheelseye.sql',
       'wheelseye-admin.sql',
       'wheelseye-live.sql',
