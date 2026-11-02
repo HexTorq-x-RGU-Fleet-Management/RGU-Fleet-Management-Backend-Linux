@@ -67,7 +67,9 @@ export function searchRecordings(
         if (event.stage === 'start-search' && event.result !== 0)
           finish(
             new Error(
-              `The recorder rejected the recording search${event.sdkError ? ` (SDK ${event.sdkError})` : ''}.`,
+              event.sdkError === 320007 || event.sdkError === 503121
+                ? 'Hikvision reports the recorder offline. Bring it online and retry the recording search.'
+                : `The recorder rejected the recording search${event.sdkError ? ` (SDK ${event.sdkError})` : ''}.`,
             ),
           );
       }
