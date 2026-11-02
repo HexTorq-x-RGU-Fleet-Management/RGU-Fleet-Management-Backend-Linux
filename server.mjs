@@ -668,16 +668,19 @@ export function createSaas({
         return json(res, 200, await hub.search(token, principal, await body(req)));
       if (url.pathname === '/api/playback/start' && req.method === 'POST') {
         const input = await body(req);
-        return json(
-          res,
-          200,
-          await hub.start(token, principal, {
+        void hub
+          .start(token, principal, {
             ...input,
             historical: true,
             delivery: input.delivery || 'mjpeg',
             quality: input.quality || 'sd',
-          }),
-        );
+          })
+          .catch(() => {});
+        return json(res, 202, {
+          state: 'connecting',
+          historical: true,
+          slot: Number(input.slot || 0),
+        });
       }
       if (url.pathname === '/api/playback/control' && req.method === 'POST')
         return json(res, 200, await hub.control(token, principal, await body(req)));
