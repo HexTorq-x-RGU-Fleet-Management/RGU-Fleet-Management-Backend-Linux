@@ -516,6 +516,19 @@ test('durable provider recovery preserves identity, credentials and permissions 
     );
     assert.equal(audit.rows[0]?.action, 'provider.recovery_attention');
   });
+  await t.test('administrator can remove playback without disconnecting device access', async () => {
+    await seed({ sdkAccessToken: 'at.authorized-playback-token', sdkValidatedAt: Date.now(), playbackNeedsReconnect: false });
+    await cameras.removePlayback(admin.token);
+    const provider = await load(), status = await cameras.status(admin.token);
+    assert.equal(provider.sessionId, 'session');
+    assert.equal(provider.sdkAccessToken, undefined);
+    assert.equal(provider.playbackNeedsReconnect, true);
+    assert.equal(status.connected, true);
+    assert.equal(status.playbackReady, false);
+    assert.equal(status.authorizationState, 'playback-required');
+    const audit = await db.session(tokenHash(admin.token), (client) => client.query("SELECT action FROM cam.audit WHERE action='provider.playback_removed' ORDER BY id DESC LIMIT 1"));
+    assert.equal(audit.rows[0]?.action, 'provider.playback_removed');
+  });
   await t.test('expired worker leases can be reclaimed after a process interruption', async () => {
     await seed({
       needsReconnect: true,

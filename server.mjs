@@ -513,6 +513,7 @@ export function createSaas({
           '/api/connect/personal',
           '/api/connect/desktop',
           '/api/connect/playback',
+          '/api/connect/playback/remove',
           '/api/disconnect',
         ].includes(url.pathname)
       ) {
@@ -536,6 +537,8 @@ export function createSaas({
           } else if (url.pathname === '/api/connect/desktop') await cameras.desktop(token);
           else if (url.pathname === '/api/connect/playback')
             await cameras.desktop(token, await body(req));
+          else if (url.pathname === '/api/connect/playback/remove')
+            await cameras.removePlayback(token);
           else {
             const { provider } = await cameras.adminProvider(token);
             await cameras.saveProvider(token, null, provider);
@@ -576,6 +579,7 @@ export function createSaas({
           200,
           await fleet.wheelseyeSourceDiagnostics(token, url.searchParams.get('sourceId'), {
             live: url.searchParams.get('live') === '1',
+            date: url.searchParams.get('date'),
           }),
         );
       if (url.pathname === '/api/fleet/wheelseye/source/poll' && req.method === 'POST')
