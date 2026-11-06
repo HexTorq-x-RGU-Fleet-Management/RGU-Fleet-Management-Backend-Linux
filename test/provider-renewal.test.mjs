@@ -496,6 +496,26 @@ test('durable provider recovery preserves identity, credentials and permissions 
       assert.equal((await cameras.status(admin.token)).sdkConnected, false);
     },
   );
+  await t.test('Linux marks rejected native playback for administrator attention', async () => {
+    await seed({ recovery: { webEnabled: false, playbackEnabled: false, web: {}, playback: {} } });
+    assert.equal(
+      await worker({ platform: 'linux' }).markPlaybackRequired(admin.principal.tenantId),
+      true,
+    );
+    const provider = await load(),
+      status = await cameras.status(admin.token);
+    assert.equal(provider.playbackNeedsReconnect, true);
+    assert.equal(provider.recovery.playback.blocked, 'playback-sign-in-required');
+    assert.equal(status.connected, true);
+    assert.equal(status.playbackReady, false);
+    assert.equal(status.authorizationState, 'playback-required');
+    const audit = await db.session(tokenHash(admin.token), (client) =>
+      client.query(
+        "SELECT action FROM cam.audit WHERE action='provider.recovery_attention' ORDER BY id DESC LIMIT 1",
+      ),
+    );
+    assert.equal(audit.rows[0]?.action, 'provider.recovery_attention');
+  });
   await t.test('expired worker leases can be reclaimed after a process interruption', async () => {
     await seed({
       needsReconnect: true,

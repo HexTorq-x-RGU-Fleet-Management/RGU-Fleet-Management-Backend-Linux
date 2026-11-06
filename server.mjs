@@ -103,7 +103,7 @@ export function createSaas({
     onRecovered: (id) => hub.closeTenant(id),
   });
   hub.onPlaybackFailure = (id) => {
-    void recovery.run(id, { playbackCheck: true }).catch(() => {});
+    void recovery.markPlaybackRequired(id).catch(() => {});
   };
   hub.onStreamHealth = (event) => {
     void health.observeStream(event).catch(() => {});
