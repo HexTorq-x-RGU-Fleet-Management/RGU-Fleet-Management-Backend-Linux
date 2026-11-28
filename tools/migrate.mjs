@@ -24,6 +24,7 @@ export async function migrate(client, { ownerRole = 'cam_owner' } = {}) {
       'fleet.sql',
       'drivers.sql',
       'routes.sql',
+      'route-planning.sql',
       'speed-monitoring.sql',
       'wheelseye.sql',
       'wheelseye-admin.sql',

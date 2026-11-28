@@ -1,9 +1,10 @@
 {
-  "windowsCommit": "a443b860bb1454ae01c82e3935e5e0143acfbdb4",
+  "windowsCommit": "39ba950be4bb6f463a4fe956b865e57a163fc3cf",
   "common": {
     "db/drivers.sql": "2026f7fabc431e46a9fc600701b1f83096932bac91fe8d58f99c2d8f7a4f1154",
     "db/fleet.sql": "96706283edaa0d328d4f3744e2d9d0268813890e4093c37dc4876768ecd12636",
     "db/routes.sql": "fd4e9923d0f84007f6aa0b6ec867a8d0c491532f9b38d7729fc8b22550d58a47",
+    "db/route-planning.sql": "49d37f37f311a49d4064ebeb57348fbd1ec14ef40818d0e9c5402f4eeae3f565",
     "db/grants.sql": "ae6ad131f7dded8ae56179edb50272fe637f66e815b932457bbebf1061da3df8",
     "db/schema.sql": "be37d5a5f3250077089e93798cffa1b977b76e9c31551ca72a11bdcfb5e15889",
     "db/workspace.sql": "2b0e601cd056788010e9401ae27e3969f0f0b07411ed82a41a2bd019ecd98a64",
